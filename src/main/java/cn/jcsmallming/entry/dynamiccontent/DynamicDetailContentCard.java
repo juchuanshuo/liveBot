@@ -12,7 +12,7 @@ public class DynamicDetailContentCard {
 
     private ContentItem item;
 
-    private Oringin origin;
+    private String origin;
 
     public String getShort_link() {
         return short_link;
@@ -23,12 +23,12 @@ public class DynamicDetailContentCard {
     }
 
     private String short_link;
+    public String getOrigin() {
 
-    public Oringin getOrigin() {
         return origin;
     }
 
-    public void setOrigin(Oringin origin) {
+    public void setOrigin(String origin) {
         this.origin = origin;
     }
 }

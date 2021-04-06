@@ -20,6 +20,15 @@ public class Oringin {
     private int tid;
     private String title;
     private String tname;
+    private ContentItem item;
+
+    public ContentItem getItem() {
+        return item;
+    }
+
+    public void setItem(ContentItem item) {
+        this.item = item;
+    }
 
     public String getSlide_link() {
         return slide_link;
