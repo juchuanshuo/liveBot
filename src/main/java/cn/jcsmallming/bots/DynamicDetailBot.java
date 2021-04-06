@@ -56,7 +56,7 @@ public class DynamicDetailBot extends BreadthCrawler {
          */
         int type =dynamicDetailApiBody.getData().getCard().getDesc().getType();
         long timeStamp = dynamicDetailApiBody.getData().getCard().getDesc().getTimestamp();
-        currentTime = new Date(timeStamp);
+        currentTime = new Date(timeStamp*1000);
 
         formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         dateString = formatter.format(currentTime);

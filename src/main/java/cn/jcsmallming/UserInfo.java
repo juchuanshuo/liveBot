@@ -2,6 +2,7 @@ package cn.jcsmallming;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class UserInfo {
@@ -13,10 +14,11 @@ public class UserInfo {
     public static int friend;
     public static int group;
     public static Properties props = new Properties();
-    static {
-        f = "src/main/resources/userinfo.properties";
+    public void init() {
+        f = "userinfo.properties";
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream(f);
         try {
-            props.load(new FileInputStream(f));
+            props.load(is);
         } catch (IOException e) {
             e.printStackTrace();
         }

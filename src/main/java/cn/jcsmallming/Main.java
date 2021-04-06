@@ -10,6 +10,7 @@ import java.util.Date;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
+        new UserInfo().init();
         QQBot qqBot = new QQBot();
         LiveBot bot = new LiveBot("crawl",true,UserInfo.roomId,qqBot);
         bot.getConf().setReadTimeout(1000 * 5);
