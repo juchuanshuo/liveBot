@@ -28,6 +28,7 @@ public class DynamicDetailBot extends BreadthCrawler {
     SimpleDateFormat formatter;
     String dateString;
     MessageChain chain;
+    String filePath = "images" +File.separator;
 
     public DynamicDetailBot(String crawlPath, boolean autoParse, String dynamicId, QQBot qqBot) {
         super(crawlPath, autoParse);
@@ -87,8 +88,8 @@ public class DynamicDetailBot extends BreadthCrawler {
                         image = ImageIO.read(url);
                         String[] temp = pic.getImg_src().split("/");
                         fileName = temp[temp.length-1];
-                        file = new File(fileName);
-                        ImageIO.write(image, "jpg", file);
+                        file = new File(filePath+fileName);
+                        ImageIO.write(image,fileName.split(".")[1] , file);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -144,7 +145,7 @@ public class DynamicDetailBot extends BreadthCrawler {
                     image = ImageIO.read(url);
                     String[] temp = pic.getImg_src().split("/");
                     fileName = temp[temp.length-1];
-                    file = new File(fileName);
+                    file = new File(filePath+fileName);
                     ImageIO.write(image, "jpg", file);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -183,9 +184,12 @@ public class DynamicDetailBot extends BreadthCrawler {
 //    public static void main(String[] args) throws Exception {
 //        new UserInfo().init();
 //        QQBot qqBot = new QQBot();
-//        DynamicDetailBot dynamicBot = new DynamicDetailBot("dynamicList",true,"510471500382484433",qqBot);
+//        DynamicDetailBot dynamicBot = new DynamicDetailBot("dynamicList",true,"511280186893919042",qqBot);
 ////        DynamicDetailBot dynamicBot = new DynamicDetailBot("dynamicList",true,"510448887377493156",qqBot);
 //        dynamicBot.getConf().setReadTimeout(1000 * 5);
-//        dynamicBot.start(1);
+//        while (true){
+//            dynamicBot.start(1);
+//            Thread.sleep(3000);
+//        }
 //    }
 }
