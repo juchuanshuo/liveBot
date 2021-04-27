@@ -28,7 +28,7 @@ public class DynamicDetailBot extends BreadthCrawler {
     SimpleDateFormat formatter;
     String dateString;
     MessageChain chain;
-    String filePath = "images" +File.separator;
+    String filePath = "./images/";
 
     public DynamicDetailBot(String crawlPath, boolean autoParse, String dynamicId, QQBot qqBot) {
         super(crawlPath, autoParse);
@@ -41,7 +41,19 @@ public class DynamicDetailBot extends BreadthCrawler {
     public void visit(Page page, CrawlDatums next) {
         content = page.html();
         dynamicDetailApiBody = JSON.parseObject(content, DynamicDetailApiBody.class);
-        String card = dynamicDetailApiBody.getData().getCard().getCard();
+        String card = "";
+        try{
+            card = dynamicDetailApiBody.getData().getCard().getCard();
+        } catch (NullPointerException ne){
+          ne.printStackTrace();
+          try {
+              this.start(1);
+          } catch (Exception exception) {
+
+              exception.printStackTrace();
+          }
+          return;
+        }
         DynamicDetailContentCard cardBody = JSON.parseObject(card, DynamicDetailContentCard.class);
         /*
         type
@@ -89,9 +101,17 @@ public class DynamicDetailBot extends BreadthCrawler {
                         String[] temp = pic.getImg_src().split("/");
                         fileName = temp[temp.length-1];
                         file = new File(filePath+fileName);
-                        ImageIO.write(image,fileName.split(".")[1] , file);
+                        String[] format = fileName.split("\\.");
+                        String formatName = format.length>1?format[format.length-1]:"jpg";
+                        ImageIO.write(image, formatName, file);
                     } catch (IOException e) {
                         e.printStackTrace();
+                        try {
+                            this.start(1);
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                        return;
                     }
                     images.add(qqBot.getBot().getFriend(UserInfo.friend).uploadImage(ExternalResource.create(file)));
                 }
@@ -146,9 +166,17 @@ public class DynamicDetailBot extends BreadthCrawler {
                     String[] temp = pic.getImg_src().split("/");
                     fileName = temp[temp.length-1];
                     file = new File(filePath+fileName);
-                    ImageIO.write(image, "jpg", file);
+                    String[] format = fileName.split("\\.");
+                    String formatName = format.length>1?format[format.length-1]:"jpg";
+                    ImageIO.write(image, formatName, file);
                 } catch (IOException e) {
                     e.printStackTrace();
+                    try {
+                        this.start(1);
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                    return;
                 }
                 images.add(qqBot.getBot().getFriend(UserInfo.friend).uploadImage(ExternalResource.create(file)));
             }
@@ -184,12 +212,9 @@ public class DynamicDetailBot extends BreadthCrawler {
 //    public static void main(String[] args) throws Exception {
 //        new UserInfo().init();
 //        QQBot qqBot = new QQBot();
-//        DynamicDetailBot dynamicBot = new DynamicDetailBot("dynamicList",true,"511280186893919042",qqBot);
+//        DynamicDetailBot dynamicBot = new DynamicDetailBot("dynamicList",true,"512440871737997080",qqBot);
 ////        DynamicDetailBot dynamicBot = new DynamicDetailBot("dynamicList",true,"510448887377493156",qqBot);
 //        dynamicBot.getConf().setReadTimeout(1000 * 5);
-//        while (true){
-//            dynamicBot.start(1);
-//            Thread.sleep(3000);
-//        }
+//        dynamicBot.start(1);
 //    }
 }

@@ -21,12 +21,12 @@ public class LiveBot extends BreadthCrawler {
     int LIVE_ON = 1;
     QQBot qqBot;
     //    static int LIVE_OFF = 0; 未开播状态有0和2
-    Boolean IS_ON_LIVE = false;
-    int count = 1;
+    static Boolean IS_ON_LIVE = false;
+    static int count = 1;
     CloseableHttpClient httpclient = HttpClients.createDefault();
 //    HttpGet httpget;
     String content = "";
-    int liveStatus=0;
+    static int liveStatus=0;
     LiveApiBody liveApiBody;
     String title="";
 //    CloseableHttpResponse response;
