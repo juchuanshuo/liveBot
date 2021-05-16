@@ -10,8 +10,6 @@ import net.mamoe.mirai.message.data.AtAll;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
 import net.mamoe.mirai.message.data.PlainText;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -23,22 +21,19 @@ public class LiveBot extends BreadthCrawler {
     //    static int LIVE_OFF = 0; 未开播状态有0和2
     static Boolean IS_ON_LIVE = false;
     static int count = 1;
-    CloseableHttpClient httpclient = HttpClients.createDefault();
-//    HttpGet httpget;
     String content = "";
-    static int liveStatus=0;
+    static int liveStatus = 0;
     LiveApiBody liveApiBody;
-    String title="";
-//    CloseableHttpResponse response;
+    String title = "";
 
     Date currentTime;
     SimpleDateFormat formatter;
     String dateString;
     MessageChain chain;
 
-    public LiveBot(String crawlPath, boolean autoParse,int roomId,QQBot qqBot) {
+    public LiveBot(String crawlPath, boolean autoParse, int roomId, QQBot qqBot) {
         super(crawlPath, autoParse);
-        this.addSeed(String.format(liveInfoApi,roomId));
+        this.addSeed(String.format(liveInfoApi, roomId));
         this.qqBot = qqBot;
         setThreads(1);
     }
@@ -47,7 +42,7 @@ public class LiveBot extends BreadthCrawler {
     public void visit(Page page, CrawlDatums next) {
         content = page.html();
         liveApiBody = JSON.parseObject(content, LiveApiBody.class);
-        if("412".equals(liveApiBody.getCode())){
+        if ("412".equals(liveApiBody.getCode())) {
             System.out.println("看來访问过于频繁被ban了，休息一会吧");
             try {
                 Thread.sleep(3601000);
@@ -58,7 +53,7 @@ public class LiveBot extends BreadthCrawler {
         }
         liveStatus = liveApiBody.getData().getRoom_info().getLive_status();
         title = liveApiBody.getData().getRoom_info().getTitle();
-        if(count%1000==0){
+        if (count % 1000 == 0) {
             qqBot.getBot().getFriend(UserInfo.friend).sendMessage("定时发消息保持在线");
             try {
                 dbManager.clear();
@@ -67,11 +62,11 @@ public class LiveBot extends BreadthCrawler {
             }
             System.gc();
         }
-        synchronized(IS_ON_LIVE) {
+        synchronized (IS_ON_LIVE) {
             System.out.println("第" + count + "次监测");
-            count ++;
-            if(liveStatus==LIVE_ON&&!IS_ON_LIVE){
-                IS_ON_LIVE=true;
+            count++;
+            if (liveStatus == LIVE_ON && !IS_ON_LIVE) {
+                IS_ON_LIVE = true;
                 System.out.println("监测到开播");
                 currentTime = new Date();
                 formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -79,19 +74,17 @@ public class LiveBot extends BreadthCrawler {
                 chain = new MessageChainBuilder()
                         .append(AtAll.INSTANCE)
                         .append(new PlainText("\n快醒醒，你老婆【绯赤艾莉欧Official】开播啦"))
-                        .append(new PlainText("\n\n开播时间：" + dateString))
-                        .append("\n\n直播标题："+title) // 会被构造成 PlainText 再添加, 相当于上一行
+                        .append(new PlainText("\n\n开播时间：" + dateString)).append("\n\n直播标题：").append(title) // 会被构造成 PlainText 再添加, 相当于上一行
                         .append("\n直播地址：https://live.bilibili.com/21396545")
                         .build();
                 qqBot.getBot().getGroup(UserInfo.group).sendMessage(chain);
                 IS_ON_LIVE = true;
-            }else if(liveStatus!=LIVE_ON&&!IS_ON_LIVE){
+            } else if (liveStatus != LIVE_ON && !IS_ON_LIVE) {
                 System.out.println("尚未开播，继续监测中");
-            }
-            else if(liveStatus!=LIVE_ON&&IS_ON_LIVE){
+            } else if (liveStatus != LIVE_ON) {
                 System.out.println("你老婆下播了");
                 IS_ON_LIVE = false;
-            }else{
+            } else {
                 System.out.println("正在直播，继续监测");
             }
         }

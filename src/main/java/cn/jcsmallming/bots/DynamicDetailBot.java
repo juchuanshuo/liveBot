@@ -6,7 +6,10 @@ import cn.edu.hfut.dmic.webcollector.plugin.rocks.BreadthCrawler;
 import cn.jcsmallming.UserInfo;
 import cn.jcsmallming.entry.dynamiccontent.*;
 import com.alibaba.fastjson.JSON;
-import net.mamoe.mirai.message.data.*;
+import net.mamoe.mirai.message.data.Image;
+import net.mamoe.mirai.message.data.MessageChain;
+import net.mamoe.mirai.message.data.MessageChainBuilder;
+import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.ExternalResource;
 
 import javax.imageio.ImageIO;
@@ -32,7 +35,7 @@ public class DynamicDetailBot extends BreadthCrawler {
 
     public DynamicDetailBot(String crawlPath, boolean autoParse, String dynamicId, QQBot qqBot) {
         super(crawlPath, autoParse);
-        this.addSeed(String.format(getDynamicDetailApi,dynamicId));
+        this.addSeed(String.format(getDynamicDetailApi, dynamicId));
         this.qqBot = qqBot;
         setThreads(1);
     }
@@ -42,17 +45,16 @@ public class DynamicDetailBot extends BreadthCrawler {
         content = page.html();
         dynamicDetailApiBody = JSON.parseObject(content, DynamicDetailApiBody.class);
         String card = "";
-        try{
+        try {
             card = dynamicDetailApiBody.getData().getCard().getCard();
-        } catch (NullPointerException ne){
-          ne.printStackTrace();
-          try {
-              this.start(1);
-          } catch (Exception exception) {
-
-              exception.printStackTrace();
-          }
-          return;
+        } catch (NullPointerException ne) {
+            ne.printStackTrace();
+            try {
+                this.start(1);
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
+            return;
         }
         DynamicDetailContentCard cardBody = JSON.parseObject(card, DynamicDetailContentCard.class);
         /*
@@ -65,17 +67,17 @@ public class DynamicDetailBot extends BreadthCrawler {
             8：分享视频
             4200：分享直播间
          */
-        int type =dynamicDetailApiBody.getData().getCard().getDesc().getType();
+        int type = dynamicDetailApiBody.getData().getCard().getDesc().getType();
         long timeStamp = dynamicDetailApiBody.getData().getCard().getDesc().getTimestamp();
-        currentTime = new Date(timeStamp*1000);
+        currentTime = new Date(timeStamp * 1000);
 
         formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         dateString = formatter.format(currentTime);
-        if(type == 1){
+        if (type == 1) {
             Oringin oringin = JSON.parseObject(cardBody.getOrigin(), Oringin.class);
             // 转发动态
             int orig_type = cardBody.getItem().getOrig_type();
-            if(orig_type==8){
+            if (orig_type == 8) {
                 //转发视频
                 chain = new MessageChainBuilder()
                         .append(new PlainText("你老婆【绯赤艾莉欧Official】刚刚转发了视频\n配文："))
@@ -85,24 +87,24 @@ public class DynamicDetailBot extends BreadthCrawler {
                         .append(new PlainText("\n\n发布时间：" + dateString))
                         .build();
                 qqBot.getBot().getGroup(UserInfo.group).sendMessage(chain);
-            }else if(orig_type==2){
+            } else if (orig_type == 2) {
                 //转发带图片动态
                 ContentItem item = oringin.getItem();
                 String dyDesc = item.getDescription();
                 List<Image> images = new ArrayList<>();
-                List<Pictures> pictures =  item.getPictures();
-                for(Pictures pic :pictures){
+                List<Pictures> pictures = item.getPictures();
+                for (Pictures pic : pictures) {
                     BufferedImage image = null;
-                    String fileName="";
-                    File file = new File(fileName);
+                    String fileName = "";
+                    File file;
                     try {
                         URL url = new URL(pic.getImg_src());
                         image = ImageIO.read(url);
                         String[] temp = pic.getImg_src().split("/");
-                        fileName = temp[temp.length-1];
-                        file = new File(filePath+fileName);
+                        fileName = temp[temp.length - 1];
+                        file = new File(filePath + fileName);
                         String[] format = fileName.split("\\.");
-                        String formatName = format.length>1?format[format.length-1]:"jpg";
+                        String formatName = format.length > 1 ? format[format.length - 1] : "jpg";
                         ImageIO.write(image, formatName, file);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -115,19 +117,19 @@ public class DynamicDetailBot extends BreadthCrawler {
                     }
                     images.add(qqBot.getBot().getFriend(UserInfo.friend).uploadImage(ExternalResource.create(file)));
                 }
-                MessageChainBuilder builder =  new MessageChainBuilder()
-                .append(new PlainText("你老婆【绯赤艾莉欧Official】刚刚转发了带图片的动态"))
+                MessageChainBuilder builder = new MessageChainBuilder()
+                        .append(new PlainText("你老婆【绯赤艾莉欧Official】刚刚转发了带图片的动态"))
                         .append("\n配文：")
                         .append(new PlainText(cardBody.getItem().getContent()))
-                        .append(new PlainText("\n原文：" + oringin.getDesc()))
+                        .append(new PlainText("\n原文：" + oringin.getItem().getDescription()))
                         .append("\n图片：\n");
-                for(Image image : images){
+                for (Image image : images) {
                     builder.append(Image.fromId(image.getImageId()));
                 }
                 builder.append(new PlainText("\n\n发布时间：" + dateString));
                 chain = builder.build();
                 qqBot.getBot().getGroup(UserInfo.group).sendMessage(chain);
-            }else if(orig_type==4200){
+            } else if (orig_type == 4200) {
                 //分享直播间
                 chain = new MessageChainBuilder()
                         .append(new PlainText("你老婆【绯赤艾莉欧Official】刚刚分享了一个直播间\n配文："))
@@ -137,37 +139,37 @@ public class DynamicDetailBot extends BreadthCrawler {
                         .append(new PlainText("\n\n发布时间：" + dateString))
                         .build();
                 qqBot.getBot().getGroup(UserInfo.group).sendMessage(chain);
-            }else if(orig_type==4){
+            } else if (orig_type == 4) {
                 //转发文字动态
                 chain = new MessageChainBuilder()
                         .append(new PlainText("你老婆【绯赤艾莉欧Official】刚刚转发了一个文字动态\n由于没翻到以前团长转发过的文字动态故没写功能"))
                         .append(new PlainText("\n\n发布时间：" + dateString))
                         .build();
                 qqBot.getBot().getGroup(UserInfo.group).sendMessage(chain);
-            } else{
+            } else {
                 chain = new MessageChainBuilder()
                         .append(new PlainText("你老婆【绯赤艾莉欧Official】刚刚转发了一个未能识别的动态类型"))
                         .append(new PlainText("\n\n发布时间：" + dateString))
                         .build();
                 qqBot.getBot().getGroup(UserInfo.group).sendMessage(chain);
             }
-        }else if(type == 2){
+        } else if (type == 2) {
             // 发布图片动态
             String dyDesc = cardBody.getItem().getDescription();
             List<Image> images = new ArrayList<>();
-            List<Pictures> pictures =  cardBody.getItem().getPictures();
-            for(Pictures pic :pictures){
+            List<Pictures> pictures = cardBody.getItem().getPictures();
+            for (Pictures pic : pictures) {
                 BufferedImage image = null;
-                String fileName="";
-                File file = new File(fileName);
+                String fileName = "";
+                File file;
                 try {
                     URL url = new URL(pic.getImg_src());
                     image = ImageIO.read(url);
                     String[] temp = pic.getImg_src().split("/");
-                    fileName = temp[temp.length-1];
-                    file = new File(filePath+fileName);
+                    fileName = temp[temp.length - 1];
+                    file = new File(filePath + fileName);
                     String[] format = fileName.split("\\.");
-                    String formatName = format.length>1?format[format.length-1]:"jpg";
+                    String formatName = format.length > 1 ? format[format.length - 1] : "jpg";
                     ImageIO.write(image, formatName, file);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -180,17 +182,17 @@ public class DynamicDetailBot extends BreadthCrawler {
                 }
                 images.add(qqBot.getBot().getFriend(UserInfo.friend).uploadImage(ExternalResource.create(file)));
             }
-            MessageChainBuilder builder =  new MessageChainBuilder()
+            MessageChainBuilder builder = new MessageChainBuilder()
                     .append(new PlainText("你老婆【绯赤艾莉欧Official】刚刚发布了图文动态\n配文："))
                     .append(new PlainText(dyDesc))
                     .append(new PlainText("\n图片：\n"));
-            for(Image image : images){
+            for (Image image : images) {
                 builder.append(Image.fromId(image.getImageId()));
             }
             builder.append(new PlainText("\n\n发布时间：" + dateString));
             chain = builder.build();
             qqBot.getBot().getGroup(UserInfo.group).sendMessage(chain);
-        } else if(type == 4){
+        } else if (type == 4) {
             // 文字动态
             chain = new MessageChainBuilder()
                     .append(new PlainText("你老婆【绯赤艾莉欧Official】刚刚发布了新动态\n"))
@@ -198,7 +200,7 @@ public class DynamicDetailBot extends BreadthCrawler {
                     .append(new PlainText("\n\n发布时间：" + dateString))
                     .build();
             qqBot.getBot().getGroup(UserInfo.group).sendMessage(chain);
-        }else if(type == 8){
+        } else if (type == 8) {
             String shortLink = cardBody.getShort_link();
             chain = new MessageChainBuilder()
                     .append(new PlainText("你老婆【绯赤艾莉欧Official】刚刚发发布了一个投稿视频\n地址："))

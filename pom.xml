@@ -31,6 +31,13 @@
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+      <groupId>org.rocksdb</groupId>
+      <artifactId>rocksdbjni</artifactId>
+      <version>5.0.1</version>
+    </dependency>
+
+
 
     <dependency>
       <groupId>org.apache.camel</groupId>

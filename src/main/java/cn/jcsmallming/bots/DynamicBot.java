@@ -58,12 +58,12 @@ public class DynamicBot extends BreadthCrawler {
 //            }
             contentBot = new DynamicDetailBot("detailContent",true,dynamicId,qqBot);
             contentBot.getConf().setReadTimeout(1000 * 5);
+            old.add(dynamicId);
             try {
                 contentBot.start(1);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
-            old.add(dynamicId);
         }else{
             System.out.println(String.format("第%d次爬取，没有新动态",count));
         }
